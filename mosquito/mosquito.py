@@ -37,4 +37,16 @@ def tail(f,n=10):
     return lines[-n:]
 
 
+def check_if_end_of_file_contains(file_name,contained_string,n=10):
+    if not os.path.exists(file_name):
+        return False
+    f = open(file_name,'r')
+
+    lines =tail(f,n=n)
+    for line in lines:
+        if contained_string in line:
+            return True
+
+    return False
+
 
