@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import subprocess
-
+import io
 
 def file_len(fname):
     x = subprocess.check_output(['wc','-l',fname])
@@ -9,6 +9,9 @@ def file_len(fname):
     return int(length)
 
 def tail(f,n=10):
+    if not isinstance(f, io.IOBase):
+        assert(isinstance(f, str))
+        f = open(f,'r')
     assert(n>0)
     pos, lines = n+1, []
 
