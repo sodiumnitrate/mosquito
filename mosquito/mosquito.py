@@ -50,3 +50,18 @@ def check_if_end_of_file_contains(file_name,contained_string,n=10):
     return False
 
 
+def get_running_job_list(user_name):
+    '''
+    Function to get list of jobs (in any status) by the given user. Designed to
+    be used on Yale's Grace cluster, it may not work on any arbitrary system
+    running Slurm.
+    '''
+    job_list = subprocess.check_output(['squeue', '-u', user_name]).split()
+    job_id = []
+    for field in job_list:
+        field_str = str(field)[2:-1]
+        if len(field_str) == 8 and field_str.isnumeric():
+            print(field_str)
+            job_id.append(field_str)
+
+    return job_id
