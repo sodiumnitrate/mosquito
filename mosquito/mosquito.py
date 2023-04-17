@@ -2,6 +2,7 @@ import numpy as np
 import os
 import subprocess
 import io
+from statistics import mean
 
 def file_len(fname):
     x = subprocess.check_output(['wc','-l',fname])
@@ -65,3 +66,46 @@ def get_running_job_list(user_name):
             job_id.append(field_str)
 
     return job_id
+
+def add_dicts(dict1, dict2):
+    """
+    Function that adds two dictionaries with identical keys such that
+    the values corresponding to the same key get added.
+    """
+    # adds together values in dicts given the keys are exactly the same
+    assert (dict1.keys() == dict2.keys())
+
+    for key in dict1.keys():
+        dict1[key] += dict2[key]
+
+    return dict1
+
+def movmean(nums, window=5):
+    """Function that calculates the moving mean of a list of numbers."""
+    # implement a simple moving mean
+    assert (window > 0)
+    assert (isinstance(window, int))
+
+    # check if nums is a list of numbers
+    if np.isscalar(nums):
+        print("ERROR: you must provide a list or array of numbers for calculating moving mean.")
+        return None
+
+    # determine radius
+    if window % 2 != 0:
+        left_r = window // 2
+        right_r = window // 2
+    else:
+        # matlab style
+        left_r = window // 2
+        right_r = window // 2 - 1
+
+    averaged = []
+    for i in range(len(nums)):
+        start = max(i - left_r, 0)
+        end = min(i + right_r, len(nums))
+
+        averaged.append(mean(nums[start:end + 1]))
+
+    return averaged
+
