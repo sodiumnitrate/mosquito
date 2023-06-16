@@ -4,6 +4,8 @@ import subprocess
 import io
 from statistics import mean
 
+from mosquito.type_check import is_one_d_int_array, is_one_d_array
+
 def file_len(fname):
     x = subprocess.check_output(['wc','-l',fname])
     length = str(x).split()[0][2:]
@@ -109,3 +111,162 @@ def movmean(nums, window=5):
 
     return averaged
 
+def check_range_overlap(range_1, range_2):
+    """
+    Given two ranges (a,b) and (c,d), return True if they overlap.
+    """
+
+    if isinstance(range_1, tuple) or isinstance(range_1, list):
+        n = len(range_1)
+        if n != 2:
+            print("ERROR: range_1 contains {n} elements.")
+            return
+    else:
+        print("ERROR: range_1 must be a tuple or a list of two elements.")
+        return
+
+    if isinstance(range_2, tuple) or isinstance(range_2, list):
+        n = len(range_2)
+        if n != 2:
+            print("ERROR: range_1 contains {n} elements.")
+            return
+    else:
+        print("ERROR: range_1 must be a tuple or a list of two elements.")
+        return
+
+    a, b = range_1[0], range_1[1]
+    c, d = range_2[0], range_2[1]
+
+    if d < a or c > b:
+        return False
+    return True
+
+
+def merge_dicts(dict1, dict2):
+    """
+    Function that merges two dicts such that:
+    - if a key exists in both, the corresponding values are added
+    - if a key does not exist in both, it gets added to the final dict
+      without any manip of the value
+    """
+    new_dict = {}
+    for key, val in dict1.items():
+        new_dict[key] = val
+
+    for key, val in dict2.items():
+        if key in new_dict.keys():
+            new_dict[key] += val
+        else:
+            new_dict[key] = val
+
+    return new_dict
+
+def ranges_from_idx_list(idx):
+    """
+    Given a list of indices, get a list of ranges (in the form of tuples)
+    of contiguous pieces.
+
+    E.g.: 
+    input --> idx = [2,3,4,5,55,56,57,58]
+    output --> [(2,5), (55,58)]
+    """
+    if not is_one_d_int_array(idx):
+        print("ERROR: idx must be a 1-d integer array.")
+        raise TypeError
+
+    n = len(idx)
+
+    if n == 1:
+        return [(idx[0],idx[0])]
+    elif n == 0:
+        return []
+
+    ranges = []
+    curr = 0
+    prev = None
+    while curr < n:
+        if prev is None:
+            start = idx[curr]
+            prev = curr
+            curr += 1
+            continue
+        if idx[curr] > idx[prev] + 1:
+            end = idx[prev]
+            ranges.append((start, end))
+            start = idx[curr]
+
+        prev = curr
+        curr += 1
+
+    if start > ranges[-1][1]:
+        end = idx[-1]
+        ranges.append((start, end))
+
+    return ranges
+
+def sparse_array_for_plot(x, y):
+    """
+    Given a data of the form f(x)=y, if y is very large, it's hard to plot. But if
+    y contains large regions of zeros, these could be removed to improve plot performance.
+
+    AFAIK, there's no built-in matplotlib functionality that achieves this.
+    """
+    if not is_one_d_array(x):
+        print("ERROR: x not a 1-d array.")
+        raise TypeError
+    if not is_one_d_array(y):
+        print("ERROR: y not a 1-d array.")
+        raise TypeError
+    if len(x) != len(y):
+        print("ERROR: x and y must be of the same length.")
+        return None
+
+    idx = np.where(np.array(y) == 0)[0]
+    ranges = ranges_from_idx_list(idx)
+    ranges = [r for r in ranges if r[1] - r[0] + 1 > 2]
+    indices_to_keep = []
+    start = 0
+    for r in ranges:
+        indices_to_keep += list(range(start,r[0]+1))
+        start = r[1]
+
+    indices_to_keep += list(range(start, len(x)))
+
+    new_x = []
+    new_y = []
+    for i in indices_to_keep:
+        new_x.append(x[i])
+        new_y.append(y[i])
+
+    # TODO: output the same type as input?
+    return new_x, new_y
+
+def array_contains_n_consecutive_vals(arr, val, n):
+    """
+    Given a 1-d array, a value, and n, check if the array contains
+    n consecutive elements that have that value.
+    """
+    if not is_one_d_array(arr):
+        print("ERROR: input must be 1-d array")
+        raise TypeError
+    if not isinstance(val, type(arr[0])):
+        print(f"ERROR: the input value type ({type(val)}) is not consistent with that of array elements ({type(arr[0])}).")
+        raise TypeError
+    if not isinstance(n, (int, np.int_)):
+        print("ERROR: n must be an integer.")
+        raise TypeError
+
+    if n <= 0:
+        print("ERROR: n must be bigger than 0.")
+        raise ValueError
+
+    if n > len(arr):
+        return False
+
+    ptrs = [i for i in range(n)]
+    while ptrs[-1] < len(arr):
+        if all([arr[i] == val for i in ptrs]):
+            return True
+        ptrs = [p+1 for p in ptrs]
+
+    return False
