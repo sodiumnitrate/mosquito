@@ -80,3 +80,22 @@ class TestMosquito:
         assert len(new_x) == len(new_y)
 
         assert not array_contains_n_consecutive_vals(new_y, 0, 3)
+
+    def test_get_number_of_zeros_after_decimal(self):
+        number = 0.99
+        assert get_number_of_zeros_after_decimal(number) == 0
+
+        number = -0.099
+        assert get_number_of_zeros_after_decimal(number) == 1
+
+        number = 1.55
+        caught = False
+        try:
+            get_number_of_zeros_after_decimal(number)
+        except ValueError:
+            caught = True
+
+        assert caught
+
+        number = 0.0000055
+        assert get_number_of_zeros_after_decimal(number) == 5

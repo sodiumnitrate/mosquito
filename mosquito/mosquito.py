@@ -270,3 +270,25 @@ def array_contains_n_consecutive_vals(arr, val, n):
         ptrs = [p+1 for p in ptrs]
 
     return False
+
+def get_number_of_zeros_after_decimal(number):
+    """
+    Given a float < 1, find number of zeros after decimal point.
+    """
+    if not isinstance(number, (float, np.float_)):
+        print("ERROR: number should be a float.")
+        raise TypeError
+
+    if np.abs(number) >= 1:
+        print(f"ERROR: |{number}| is >= 1.")
+        raise ValueError
+
+    # TODO: float vs. higher precision?
+    num_str = f"{number:.16f}".split('.')[1]
+    ct = 0
+    for char in num_str:
+        if char != '0':
+            break
+        ct += 1
+
+    return ct
