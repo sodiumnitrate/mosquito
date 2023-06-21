@@ -99,3 +99,41 @@ class TestMosquito:
 
         number = 0.0000055
         assert get_number_of_zeros_after_decimal(number) == 5
+
+    def test_is_num_in_range(self):
+        num = 55
+        range_1 = (55, 105)
+        assert is_num_in_range(num, range_1)
+
+        num = 65.2
+        assert is_num_in_range(num, range_1)
+
+        num = 105
+        assert is_num_in_range(num, range_1)
+
+    def test_check_overlap_range_list(self):
+        ranges = [(1,5), (10, 20), (55.5, 123.3)]
+        assert not check_overlap_range_list(ranges)
+
+        ranges = [(1, 15), (10, 20), (55.5, 123.3)]
+        assert check_overlap_range_list(ranges)
+
+        ranges = [(1, 10), (10, 20), (55.5, 123.3)]
+        assert check_overlap_range_list(ranges)
+
+    def test_check_overlap_range_two_lists(self):
+        ranges_1 = [(1,5), (10, 20), (55.5, 123.3)]
+        ranges_2 = [(1,5), (10, 60), (55.5, 123.3)]
+        assert check_overlap_range_two_lists(ranges_1, ranges_2)
+
+        ranges_1 = [(1,5), (10, 15), (300, 400)]
+        ranges_2 = [(6,8), (20, 60), (55.5, 123.3)]
+        assert not check_overlap_range_two_lists(ranges_1, ranges_2)
+
+    def test_check_overlap_range_list_of_lists(self):
+        ranges_1 = [(1,5), (10, 15), (300, 400)]
+        ranges_2 = [(6,8), (20, 60), (55.5, 123.3)]
+        ranges_3 = [(-100, 0), (800, 900.33)]
+
+        list_of_ranges = [ranges_1, ranges_2, ranges_3]
+        assert not check_overlap_range_list_of_lists(list_of_ranges)

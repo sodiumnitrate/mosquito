@@ -3,6 +3,7 @@ import os
 import subprocess
 import io
 from statistics import mean
+from itertools import combinations
 
 from mosquito.type_check import is_one_d_int_array, is_one_d_array
 
@@ -141,6 +142,40 @@ def check_range_overlap(range_1, range_2):
         return False
     return True
 
+# TODO: refactor the following 3 
+def check_overlap_range_list_of_lists(list_of_lists):
+    """
+    Given a list of list of ranges, check overlap across sublists.
+    """
+    res = combinations(list_of_lists, 2)
+    for pair in res:
+        if check_overlap_range_two_lists(pair[0], pair[1]):
+            return True
+
+    return False
+
+def check_overlap_range_two_lists(list_1, list_2):
+    """
+    Given two list of ranges, return True if there is any overlap,
+    Fale if there is none.
+    """
+    for range_1 in list_1:
+        for range_2 in list_2:
+            if check_range_overlap(range_1, range_2):
+                return True
+
+    return False
+
+def check_overlap_range_list(list_1):
+    """
+    Given a list of ranges, return True if any overlap, False if not.
+    """
+    for i in range(len(list_1)):
+        for j in range(i+1, len(list_1)):
+            if check_range_overlap(list_1[i], list_1[j]):
+                return True
+
+    return False
 
 def merge_dicts(dict1, dict2):
     """
@@ -292,3 +327,13 @@ def get_number_of_zeros_after_decimal(number):
         ct += 1
 
     return ct
+
+def is_num_in_range(num, range_1):
+    """
+    Given a number and a range, check if number in range.
+
+    If range = (a, b), returns true if num in [a,b].
+    """
+    if num >= range_1[0] and num <= range_1[1]:
+        return True
+    return False
