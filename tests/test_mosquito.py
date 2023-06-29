@@ -1,7 +1,5 @@
 from mosquito.mosquito import *
 
-import pdb
-
 class TestMosquito:
     def test_check_range_overlap(self):
         range_1 = (5,55)
