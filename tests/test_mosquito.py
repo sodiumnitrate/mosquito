@@ -137,3 +137,25 @@ class TestMosquito:
 
         list_of_ranges = [ranges_1, ranges_2, ranges_3]
         assert not check_overlap_range_list_of_lists(list_of_ranges)
+
+    def test_sort_array_by_column(self):
+        a = [1,0,3,2,4]
+        b = [0,1,2,3,4]
+
+        data = [a, b]
+
+        sorted_data = sort_arrays(a, b)
+        
+        a_sorted = sorted_data[0]
+        b_sorted = sorted_data[1]
+
+        assert a_sorted == b
+        assert b_sorted == a
+
+        c = [5,6,7,8,9]
+
+        sorted_data = sort_arrays(a, [b, c])
+
+        assert sorted_data[0] == b
+        assert sorted_data[1] == a
+        assert sorted_data[2] == [6, 5, 8, 7, 9]

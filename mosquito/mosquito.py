@@ -5,7 +5,7 @@ import io
 from statistics import mean
 from itertools import combinations
 
-from mosquito.type_check import is_one_d_int_array, is_one_d_array
+from mosquito.type_check import is_one_d_int_array, is_one_d_array, is_one_d_num_array
 
 def file_len(fname):
     x = subprocess.check_output(['wc','-l',fname])
@@ -337,3 +337,76 @@ def is_num_in_range(num, range_1):
     if num >= range_1[0] and num <= range_1[1]:
         return True
     return False
+
+def linear_interp(x1, x2, y1, y2, x_query):
+    """
+    Consider a line segmend (x1, y1) -> (x2, y2). Given
+    x_query in (x1, x2), find y_query, using linear interpolation.
+    """
+    if not is_num_in_range(x_query):
+        print(f"WARNING: {x_query} not in ({x1}, {x2}).")
+        return None
+
+    # vertical line
+    # TODO: redundant?
+    if x1 == x2 and x1 != x_query:
+        print(f"WARNING: {x_query} not in ({x1}, {x2}).")
+        return None
+
+    if x_query == x1:
+        return y1
+    if x_query == x2:
+        return y2
+
+    # horizontal line
+    if y1 == y2:
+        return y1
+
+    slope = (y2 - y1) / (x2 - x1)
+    intercept = y1 - slope * x1
+
+    return slope * x_query + intercept
+
+def expand_data_with_linear_interp(x, y, x_query):
+    """
+    Given a curve defined by x & y, and given x_query values,
+    get y_query by linear interpolation.
+
+    Assuming x is sorted.
+    """
+    x = np.array(x)
+    y = np.array(y)
+    y_query = []
+    for val in x_query:
+        diff = x - val
+        idx = np.argpartition(diff, 2)
+        y_val = linear_interp(x[idx[0]], x[idx[1]], y[idx[0]], y[idx[1]], val)
+        y_query.append(y_val)
+
+    return y_query
+
+def sort_arrays(ref_array, to_be_sorted):
+    """
+    Function to sort arrays in a list, given a reference array.
+    """
+    if not is_one_d_num_array(ref_array):
+        print("ERROR: ref array must be a 1d num array.")
+        raise TypeError
+
+    if not isinstance(to_be_sorted, list):
+        print("ERROR: to_be_sorted must be a list")
+        raise TypeError
+
+    if is_one_d_array(to_be_sorted):
+        to_be_sorted = [to_be_sorted]
+    else:
+        if not all([is_one_d_array(el) for el in to_be_sorted]):
+            raise TypeError
+
+    indices = np.argsort(np.array(ref_array))
+    result = [[ref_array[i] for i in indices]]
+    for arr in to_be_sorted:
+        new_arr = [arr[i] for i in indices]
+        result.append(new_arr)
+
+    return result

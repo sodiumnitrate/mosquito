@@ -37,3 +37,17 @@ def is_one_d_int_array(arr):
         return False
 
     return True
+
+def is_one_d_num_array(arr):
+    """
+    Checks if input is a 1d array of numbers.
+
+    Empty array passes the check.
+    """
+    if not is_one_d_array(arr):
+        return False
+
+    if not all([isinstance(a, (int, np.int_, float, np.float_)) for a in arr]):
+        return False
+
+    return True
