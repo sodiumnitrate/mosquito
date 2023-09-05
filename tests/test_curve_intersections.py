@@ -4,8 +4,6 @@ Unit tests for CurveIntersections.
 
 from mosquito.curve_intersections import CurveIntersections
 
-import pdb
-
 class TestCurveIntersections:
     def test_init(self):
         x = [1,2,3,4,5]

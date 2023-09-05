@@ -6,9 +6,7 @@ determine intersections between them.
 import numpy as np
 
 from mosquito.type_check import is_one_d_array, is_non_scalar, is_one_d_num_array
-from mosquito.mosquito import sort_arrays
-
-import pdb
+from mosquito.mosquito import sort_arrays, find_intersection_of_two_lines
 
 class CurveIntersections:
     def __init__(self, x, y):
@@ -26,6 +24,10 @@ class CurveIntersections:
         self.int_idx = None
 
     def check_data(self):
+        """
+        Check the input data for validity, and determine whether the curves
+        share x-values.
+        """
         if not is_non_scalar(self.y):
             raise TypeError
         else:
@@ -41,7 +43,11 @@ class CurveIntersections:
                 raise ValueError
             if not is_one_d_num_array(self.x[0]) or not is_one_d_num_array(self.x[1]):
                 raise TypeError
-            self.shared_x = False
+            if self.x[0] == self.x[1]:
+                self.shared_x = True
+                self.x = self.x[0]
+            else:
+                self.shared_x = False
         else:
             raise TypeError
 
@@ -74,10 +80,16 @@ class CurveIntersections:
 
 
     def find_intersections_shared_x(self, interpolate=False):
+        """
+        Function to find intersections between the curves, given the x-values are
+        shared.
+        """
         x = np.array(self.x)
             
         y1 = np.array(self.y[0])
         y2 = np.array(self.y[1])
+
+        # the difference between the two curves at all x
         diff = y1 - y2
 
         # zero out below tolerance
@@ -85,6 +97,9 @@ class CurveIntersections:
 
         self.diff = diff
 
+        # determine the index and number of intersection points
+        # if there are more than one consecutive intersection points, only the first
+        # and the last are taken.
         int_idx = []
         n_points = 0
         prev_ptr = 0
@@ -115,6 +130,9 @@ class CurveIntersections:
             prev_ptr += 1
 
         self.n_points = n_points
+        self.int_idx = int_idx
+
+        # get indices, and x- and y-values of intersections
         self.int_idx = []
         x_int = []
         y_int = []
@@ -127,14 +145,18 @@ class CurveIntersections:
                 # then we have a sign change
                 a = idx[0]
                 b = idx[1]
-                if np.abs(diff[a]) < np.abs(diff[b]):
-                    x_int.append(x[a])
-                    y_int.append(y1[a])
-                    self.int_idx.append(a)
+                if interpolate:
+                    x, y = find_intersection_of_two_lines(pts1=[[x[a], x[b]], [y1[a], y1[b]]],
+                                                          pts2=[[x[a], x[b]], [y2[a], y2[b]]])
                 else:
-                    x_int.append(x[b])
-                    y_int.append(y1[b])
-                    self.int_idx.append(b)
+                    if np.abs(diff[a]) < np.abs(diff[b]):
+                        x_int.append(x[a])
+                        y_int.append(y1[a])
+                        self.int_idx.append(a)
+                    else:
+                        x_int.append(x[b])
+                        y_int.append(y1[b])
+                        self.int_idx.append(b)
         self.int_x = x_int
         self.int_y = y_int
 

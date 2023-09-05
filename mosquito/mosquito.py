@@ -290,6 +290,39 @@ def is_num_in_range(num, range_1):
         return True
     return False
 
+def find_intersection_of_two_lines(pts1=None, pts2=None, m=None, c=None):
+    """
+    Given two lines (as two sets of two points, or a set of slopes and y-ints),
+    find the point of intersection.
+    """
+    if pts1 is None:
+        if m is None or c is None:
+            print("ERROR: insufficient information.")
+            raise ValueError
+        elif len(m) == 2 and len(c) == 2:
+            m1 = m[0]
+            m2 = m[1]
+            c1 = c[0]
+            c2 = c[1]
+        else:
+            raise ValueError
+    else:
+        if pts2 is None:
+            raise ValueError
+        if m is not None or c is not None:
+            print("WARNING: you provided both points and slopes/intercepts. Using the points only.")
+
+        #TODO: check length/type of pts1 and pts2
+        m1 = (pts1[0][1] - pts1[0][1]) / (pts1[0][0] - pts1[0][0])
+        m2 = (pts2[0][1] - pts2[0][1]) / (pts2[0][0] - pts2[0][0])
+        c1 = pts1[0][1] - m1 * pts1[0][0]
+        c2 = pts2[0][1] - m2 * pts2[0][0]
+
+    x = (c1 - c2) / (m2 - m1)
+    y = m1 * x + c1
+    
+    return x, y
+
 def linear_interp(x1, x2, y1, y2, x_query):
     """
     Consider a line segmend (x1, y1) -> (x2, y2). Given
